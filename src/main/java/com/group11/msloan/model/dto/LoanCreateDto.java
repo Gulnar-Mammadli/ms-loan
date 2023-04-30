@@ -8,13 +8,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoanDto {
+public class LoanCreateDto {
 
     private Long customerId;
     private Long documentId;
@@ -23,7 +22,5 @@ public class LoanDto {
     private BigDecimal paymentAmount;
     private String term;
     private Status status;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
     private BigDecimal interestRate;
 }

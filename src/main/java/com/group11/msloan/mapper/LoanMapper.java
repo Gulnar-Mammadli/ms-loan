@@ -2,7 +2,7 @@ package com.group11.msloan.mapper;
 
 
 import com.group11.msloan.model.Loan;
-import com.group11.msloan.model.dto.LoanDto;
+import com.group11.msloan.model.dto.LoanCreateDto;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -10,7 +10,7 @@ import org.mapstruct.factory.Mappers;
 public interface LoanMapper {
 
     LoanMapper INSTANCE = Mappers.getMapper(LoanMapper.class);
-    Loan mapToCustomer(LoanDto loanDto);
+    Loan mapToCustomer(LoanCreateDto loanCreateDto);
 }
 
 
