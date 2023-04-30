@@ -25,14 +25,26 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonProperty("customer_id")
+    @Column(nullable = false,name = "customer_id")
     private Long customerId;
+
+
+    @JsonProperty("document_id")
+    @Column(nullable = false,name = "document_id")
     private Long documentId;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("loan_type")
+    @Column(name = "loan_type")
     private LoanType loanType;
 
     private BigDecimal amount;
+
+    @JsonProperty("payment_amount")
+    @Column(name = "payment_amount")
     private BigDecimal paymentAmount;
+
     private String term;
 
     @Enumerated(EnumType.STRING)
