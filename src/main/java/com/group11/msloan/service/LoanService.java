@@ -22,46 +22,30 @@ public class LoanService {
     private final LoanRepository loanRepository;
 
 
-    //    TODO
-//     loanType? cox ola biler status nezere alinmalimi? eledirse hansi status.
-//     listin hamisini accepted ise yenisini yarada bilsin.
+    //    TODO submit statusu nezere alinmalimi?
     public Loan createLoan(LoanDto loanDto) {
-
-        Optional<List<Loan>> result = loanRepository.findByCustomerIdAndLoanType(loanDto.getCustomerId(), loanDto.getLoanType());
+        Optional<Loan> result = loanRepository.findByCustomerIdAndLoanTypeAndStatus(loanDto.getCustomerId(), loanDto.getLoanType(), Status.INITIALIZED);
         if (result.isEmpty()) {
             Loan loan = LoanMapper.INSTANCE.mapToLoan(loanDto);
             loan.setCreatedAt(LocalDateTime.now());
             loan.setStatus(Status.INITIALIZED);
             return loanRepository.save(loan);
         }
-        List<Loan> loans = result.get();
-        int count = 0;
-        for (Loan l : loans) {
-            if (l.getStatus() != Status.ACCEPTED) {
-                count += 1;
-            }
-        }
-
-        if (count > 0) {
-            return null;
-        } else {
-            Loan loan = LoanMapper.INSTANCE.mapToLoan(loanDto);
-            loan.setCreatedAt(LocalDateTime.now());
-            loan.setStatus(Status.INITIALIZED);
-            return loanRepository.save(loan);
-        }
+        return null;
     }
 
-
-//TODO
+    //TODO
     public Loan updateLoan(LoanUpdateDto dto, Long loanId) {
         Optional<Loan> result = loanRepository.findAllByCustomerIdAndId(dto.getCustomerId(), loanId);
         if (result.isPresent()) {
 
             if (result.get().getStatus() == Status.INITIALIZED) {
+
+//                loan type deyismek olar o vaxtki o typeda initizalized basqasi yoxdu
                 Loan loan = LoanMapper.INSTANCE.mapFromLoanUpdateDto(dto);
                 loan.setId(loanId);
                 loan.setCreatedAt(result.get().getCreatedAt());
+                loan.setUpdatedAt(LocalDateTime.now());
                 if (loan.getStatus() == Status.SUBMITTED || loan.getStatus() == Status.REFUSED) {
                     loan.setUpdatedAt(LocalDateTime.now());
                 } else if (loan.getStatus() == Status.OFFERED) {
@@ -76,12 +60,6 @@ public class LoanService {
                 if (dto.getStatus() == Status.REFUSED || dto.getStatus() == Status.OFFERED || dto.getStatus() == Status.ACCEPTED) {
                     result.get().setStatus(dto.getStatus());
                     result.get().setUpdatedAt(LocalDateTime.now());
-                    return result.get();
-                }
-
-            } else if (result.get().getStatus() == Status.REFUSED) {
-
-                if (dto.getStatus() == Status.OFFERED || dto.getStatus() == Status.ACCEPTED) {
                     return result.get();
                 }
 

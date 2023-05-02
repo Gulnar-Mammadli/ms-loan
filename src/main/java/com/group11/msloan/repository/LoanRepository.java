@@ -13,8 +13,7 @@ import java.util.Optional;
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Long> {
 
-    Optional<List<Loan>> findByCustomerIdAndLoanType(Long customerId, LoanType loanType);
-
+    Optional<Loan> findByCustomerIdAndLoanTypeAndStatus(Long customerId,LoanType loanType,Status status);
     Optional<Loan> findAllByCustomerIdAndId(Long customerId,Long id);
 
     Optional<List<Loan>> findAllByCustomerIdOrStatusOrLoanTypeOrAmountLessThanOrAmountGreaterThan(Long customerId,
