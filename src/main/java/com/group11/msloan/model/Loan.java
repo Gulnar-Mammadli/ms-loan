@@ -29,37 +29,27 @@ public class Loan {
     @Column(nullable = false,name = "customer_id")
     private Long customerId;
 
-
-    @JsonProperty("document_id")
-    @Column(nullable = false,name = "document_id")
-    private Long documentId;
-
     @Enumerated(EnumType.STRING)
     @JsonProperty("loan_type")
-    @Column(name = "loan_type")
+    @Column(nullable = false,name = "loan_type")
     private LoanType loanType;
 
+    @Column(nullable = false)
     private BigDecimal amount;
 
-    @JsonProperty("payment_amount")
-    @Column(name = "payment_amount")
-    private BigDecimal paymentAmount;
-
+    @Column(nullable = false)
     private String term;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private Status status;
 
     @JsonProperty("created_at")
-    @Column(name = "created_at")
+    @Column(nullable = false,name = "created_at")
     private LocalDateTime createdAt;
 
     @JsonProperty("updated_at")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
-
-    @JsonProperty("interest_rate")
-    @Column(name = "interest_rate")
-    private BigDecimal interestRate;
 
 }
