@@ -1,7 +1,7 @@
 package com.group11.msloan.model.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.group11.msloan.model.enums.LoanType;
-import com.group11.msloan.model.enums.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,14 +13,14 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LoanCreateDto {
+public class LoanDto {
 
+    @JsonProperty("customer_id")
     private Long customerId;
-    private Long documentId;
+
+    @JsonProperty("loan_type")
     private LoanType loanType;
+
     private BigDecimal amount;
-    private BigDecimal paymentAmount;
     private String term;
-    private Status status;
-    private BigDecimal interestRate;
 }
