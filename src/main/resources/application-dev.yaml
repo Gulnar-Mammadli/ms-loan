@@ -19,3 +19,7 @@ spring:
       ddl-auto: update
 
 
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8088/eureka/
