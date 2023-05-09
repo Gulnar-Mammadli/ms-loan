@@ -69,9 +69,7 @@ public class LoanService {
                     result.get().setStatus(dto.getStatus());
                     result.get().setUpdatedAt(LocalDateTime.now());
                     return result.get();
-                }
-
-            }
+                }}
         }
         return null;
     }
