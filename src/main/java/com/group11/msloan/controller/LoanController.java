@@ -1,7 +1,7 @@
 package com.group11.msloan.controller;
 
 import com.group11.msloan.model.Loan;
-import com.group11.msloan.model.dto.LoanDto;
+import com.group11.msloan.model.dto.LoanCreateDto;
 import com.group11.msloan.model.dto.LoanUpdateDto;
 import com.group11.msloan.model.enums.LoanType;
 import com.group11.msloan.model.enums.Status;
@@ -20,7 +20,7 @@ public class LoanController {
     private final LoanService loanService;
 
     @PostMapping
-    Loan createLoan(@RequestBody LoanDto loanDto){
+    Loan createLoan(@RequestBody LoanCreateDto loanDto){
         return loanService.createLoan(loanDto);
     }
 

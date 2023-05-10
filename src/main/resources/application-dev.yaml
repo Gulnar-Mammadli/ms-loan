@@ -18,8 +18,37 @@ spring:
     hibernate:
       ddl-auto: update
 
+#
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://localhost:8088/eureka/
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8088/eureka/
+  kafka:
+    producer:
+      bootstrap-servers: localhost:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping:
+          loandto: com.group11.msloan.model.dto.LoanDto
+
+#spring.kafka.producer.properties.spring.json.type.mapping=order:com.esi.orderservice.model.Order
+#spring.kafka.producer.properties.spring.json.type.mapping=loandto:com.group11.msloan.model.dto.LoanDto
+
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: loanDecisionGroup
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.type.mapping:
+          loandtosend: com.group11.msloan.model.dto.LoanDto
+        spring.json.trusted.packages: "*"
+      enable-auto-commit: false
+
+
+logging:
+  level:
+    com: INFO

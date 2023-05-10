@@ -2,12 +2,16 @@ package com.group11.msloan.service;
 
 import com.group11.msloan.mapper.LoanMapper;
 import com.group11.msloan.model.Loan;
+import com.group11.msloan.model.dto.LoanCreateDto;
 import com.group11.msloan.model.dto.LoanDto;
 import com.group11.msloan.model.dto.LoanUpdateDto;
 import com.group11.msloan.model.enums.LoanType;
 import com.group11.msloan.model.enums.Status;
 import com.group11.msloan.repository.LoanRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,16 +21,60 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class LoanService {
 
     private final LoanRepository loanRepository;
 
+    private final KafkaTemplate<String, LoanDto> kafkaTemplate;
 
-    //    TODO submit statusu nezere alinmalimi?
-    public Loan createLoan(LoanDto loanDto) {
-        Optional<Loan> result = loanRepository.findByCustomerIdAndLoanTypeAndStatus(loanDto.getCustomerId(), loanDto.getLoanType(), Status.INITIALIZED);
+
+    public void addLoan(LoanDto loanDto) {
+        Loan loan = Loan.builder()
+                .id(loanDto.getId())
+                .customerId(loanDto.getCustomerId())
+                .loanType(loanDto.getLoanType())
+                .amount(loanDto.getAmount())
+                .term(loanDto.getTerm())
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        loan.setStatus(Status.SUBMITTED);
+
+        loanRepository.save(loan);
+
+        loanDto.setStatus(Status.SUBMITTED);
+
+        // Push the loanDto to the loanCreatedTopic topic
+        kafkaTemplate.send("loanCreatedTopic", loanDto);
+
+    }
+
+    @KafkaListener(topics = "decisionTopic", groupId = "loanDecisionGroup" )
+    public void updateDecisionInfo(LoanDto loanDto){
+
+        Loan loan = Loan.builder()
+                .id(loanDto.getId())
+                .customerId(loanDto.getCustomerId())
+                .loanType(loanDto.getLoanType())
+                .amount(loanDto.getAmount())
+                .term(loanDto.getTerm())
+                .status(loanDto.getStatus())
+                .createdAt(loanDto.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+        loanRepository.save(loan);
+    }
+
+
+
+
+
+    //    TODO old
+    public Loan createLoan(LoanCreateDto loanCreateDto) {
+        Optional<Loan> result = loanRepository.findByCustomerIdAndLoanTypeAndStatus(loanCreateDto.getCustomerId(), loanCreateDto.getLoanType(), Status.INITIALIZED);
         if (result.isEmpty()) {
-            Loan loan = LoanMapper.INSTANCE.mapToLoan(loanDto);
+            Loan loan = LoanMapper.INSTANCE.mapToLoan(loanCreateDto);
             loan.setCreatedAt(LocalDateTime.now());
             loan.setStatus(Status.INITIALIZED);
             return loanRepository.save(loan);
@@ -34,14 +82,15 @@ public class LoanService {
         return null;
     }
 
-    //TODO
+
+
+    //TODO old
     public Loan updateLoan(LoanUpdateDto dto, Long loanId) {
         Optional<Loan> result = loanRepository.findAllByCustomerIdAndId(dto.getCustomerId(), loanId);
         if (result.isPresent()) {
 
             if (result.get().getStatus() == Status.INITIALIZED) {
 
-//                loan type deyismek olar o vaxtki o typeda initizalized basqasi yoxdu
                 Loan loan = LoanMapper.INSTANCE.mapFromLoanUpdateDto(dto);
                 loan.setId(loanId);
                 loan.setCreatedAt(result.get().getCreatedAt());
