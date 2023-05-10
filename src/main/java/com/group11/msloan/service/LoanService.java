@@ -29,7 +29,7 @@ public class LoanService {
     private final KafkaTemplate<String, LoanDto> kafkaTemplate;
 
 
-    public void addLoan(LoanDto loanDto) {
+    public Loan addLoan(LoanDto loanDto) {
         Loan loan = Loan.builder()
                 .id(loanDto.getId())
                 .customerId(loanDto.getCustomerId())
@@ -41,12 +41,13 @@ public class LoanService {
 
         loan.setStatus(Status.SUBMITTED);
 
-        loanRepository.save(loan);
+        Loan result = loanRepository.save(loan);
 
         loanDto.setStatus(Status.SUBMITTED);
 
         // Push the loanDto to the loanCreatedTopic topic
         kafkaTemplate.send("loanCreatedTopic", loanDto);
+        return result;
 
     }
 
