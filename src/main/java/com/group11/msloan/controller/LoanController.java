@@ -3,7 +3,6 @@ package com.group11.msloan.controller;
 import com.group11.msloan.model.Loan;
 import com.group11.msloan.model.dto.LoanCreateDto;
 import com.group11.msloan.model.dto.LoanDto;
-import com.group11.msloan.model.dto.LoanUpdateDto;
 import com.group11.msloan.model.enums.LoanType;
 import com.group11.msloan.model.enums.Status;
 import com.group11.msloan.service.LoanService;
@@ -25,15 +24,9 @@ public class LoanController {
         return loanService.createLoan(loanDto);
     }
 
-    @PostMapping("/kafka")
-    Loan addLoan(@RequestBody LoanDto loanDto){
-        return loanService.addLoan(loanDto);
-    }
-
-
-    @PutMapping("/{loanId}")
-    Loan updateLoan(@RequestBody LoanUpdateDto dto, @PathVariable Long loanId){
-        return loanService.updateLoan(dto,loanId);
+    @PutMapping()
+    Loan updateLoan(@RequestBody LoanDto loanDto){
+        return loanService.updateLoan(loanDto);
     }
 
     @GetMapping("/{loanId}")

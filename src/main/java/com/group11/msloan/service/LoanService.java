@@ -4,7 +4,6 @@ import com.group11.msloan.mapper.LoanMapper;
 import com.group11.msloan.model.Loan;
 import com.group11.msloan.model.dto.LoanCreateDto;
 import com.group11.msloan.model.dto.LoanDto;
-import com.group11.msloan.model.dto.LoanUpdateDto;
 import com.group11.msloan.model.enums.LoanType;
 import com.group11.msloan.model.enums.Status;
 import com.group11.msloan.repository.LoanRepository;
@@ -28,54 +27,6 @@ public class LoanService {
 
     private final KafkaTemplate<String, LoanDto> kafkaTemplate;
 
-
-    public Loan addLoan(LoanDto loanDto) {
-        Loan loan = Loan.builder()
-                .id(loanDto.getId())
-                .customerId(loanDto.getCustomerId())
-                .loanType(loanDto.getLoanType())
-                .amount(loanDto.getAmount())
-                .term(loanDto.getTerm())
-                .createdAt(LocalDateTime.now())
-                .build();
-
-        loan.setStatus(Status.SUBMITTED);
-
-        Loan result = loanRepository.save(loan);
-
-
-        loanDto.setStatus(Status.SUBMITTED);
-        loanDto.setCreatedAt(loan.getCreatedAt());
-
-        // Push the loanDto to the loanCreatedTopic topic
-        kafkaTemplate.send("loanCreatedTopic", loanDto);
-        log.info("An loan id: {} is added to the Database", loan.getId());
-        return result;
-
-    }
-
-    @KafkaListener(topics = "decisionTopic", groupId = "loanDecisionGroup" )
-    public void updateDecisionInfo(LoanDto loanDto){
-
-        Loan loan = Loan.builder()
-                .id(loanDto.getId())
-                .customerId(loanDto.getCustomerId())
-                .loanType(loanDto.getLoanType())
-                .amount(loanDto.getAmount())
-                .term(loanDto.getTerm())
-                .status(loanDto.getStatus())
-                .createdAt(loanDto.getCreatedAt())
-                .updatedAt(loanDto.getUpdatedAt())
-                .build();
-        loanRepository.save(loan);
-        log.info("Loan {}  status updated", loan.getId());
-    }
-
-
-
-
-
-    //    TODO old
     public Loan createLoan(LoanCreateDto loanCreateDto) {
         Optional<Loan> result = loanRepository.findByCustomerIdAndLoanTypeAndStatus(loanCreateDto.getCustomerId(), loanCreateDto.getLoanType(), Status.INITIALIZED);
         if (result.isEmpty()) {
@@ -87,46 +38,83 @@ public class LoanService {
         return null;
     }
 
+    @KafkaListener(topics = "decisionTopic", groupId = "loanDecisionGroup")
+    public void updateByDecisionInfo(LoanDto loanDto) {
 
-
-    //TODO old
-    public Loan updateLoan(LoanUpdateDto dto, Long loanId) {
-        Optional<Loan> result = loanRepository.findAllByCustomerIdAndId(dto.getCustomerId(), loanId);
+        Optional<Loan> result = loanRepository.findById(loanDto.getId());
         if (result.isPresent()) {
+            Loan loan = Loan.builder()
+                    .id(loanDto.getId())
+                    .customerId(loanDto.getCustomerId())
+                    .loanType(loanDto.getLoanType())
+                    .amount(loanDto.getAmount())
+                    .term(loanDto.getTerm())
+                    .status(loanDto.getStatus())
+                    .createdAt(result.get().getCreatedAt())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            loanRepository.save(loan);
+            log.info("Loan {}  status updated", loan.getId());
+        }
+    }
 
-            if (result.get().getStatus() == Status.INITIALIZED) {
+    public Loan updateLoan(LoanDto loanDto) {
+        Optional<Loan> response = loanRepository.findByCustomerIdAndId(loanDto.getCustomerId(), loanDto.getId());
+        if (response.isPresent()) {
+            if (response.get().getStatus() == Status.INITIALIZED) {
 
-                Loan loan = LoanMapper.INSTANCE.mapFromLoanUpdateDto(dto);
-                loan.setId(loanId);
-                loan.setCreatedAt(result.get().getCreatedAt());
-                loan.setUpdatedAt(LocalDateTime.now());
-                if (loan.getStatus() == Status.SUBMITTED || loan.getStatus() == Status.REFUSED) {
-                    loan.setUpdatedAt(LocalDateTime.now());
-                } else if (loan.getStatus() == Status.OFFERED) {
-                    loan.setStatus(result.get().getStatus());
-                } else if (loan.getStatus() == Status.ACCEPTED) {
-                    loan.setStatus(result.get().getStatus());
+                if (loanDto.getStatus() == Status.SUBMITTED) {
+                    Loan loan = Loan.builder()
+                            .id(loanDto.getId())
+                            .customerId(loanDto.getCustomerId())
+                            .loanType(loanDto.getLoanType())
+                            .amount(loanDto.getAmount())
+                            .term(loanDto.getTerm())
+                            .status(Status.SUBMITTED)
+                            .createdAt(response.get().getCreatedAt())
+                            .updatedAt(LocalDateTime.now())
+                            .build();
+
+                    Loan result = loanRepository.save(loan);
+
+                    loanDto.setStatus(Status.SUBMITTED);
+
+                    // Push the loanDto to the loanCreatedTopic topic
+                    kafkaTemplate.send("loanCreatedTopic", loanDto);
+                    log.info("An loan id: {} has been updated and sent for decision", loan.getId());
+                    return result;
+
+                } else if (loanDto.getStatus() == Status.REFUSED) {
+                    response.get().setStatus(Status.REFUSED);
+                    response.get().setUpdatedAt(LocalDateTime.now());
+                    return loanRepository.save(response.get());
                 }
-                return loanRepository.save(loan);
 
-            } else if (result.get().getStatus() == Status.SUBMITTED) {
-
-                if (dto.getStatus() == Status.REFUSED || dto.getStatus() == Status.OFFERED || dto.getStatus() == Status.ACCEPTED) {
-                    result.get().setStatus(dto.getStatus());
-                    result.get().setUpdatedAt(LocalDateTime.now());
-                    return result.get();
+            } else if (response.get().getStatus() == Status.SUBMITTED) {
+                if (loanDto.getStatus() == Status.REFUSED) {
+                    response.get().setStatus(Status.REFUSED);
+                    response.get().setUpdatedAt(LocalDateTime.now());
+                    return loanRepository.save(response.get());
                 }
 
-            } else if (result.get().getStatus() == Status.OFFERED) {
+            } else if (response.get().getStatus() == Status.REFUSED) {
+                response.get().setUpdatedAt(LocalDateTime.now());
+                return loanRepository.save(response.get());
 
-                if (dto.getStatus() == Status.ACCEPTED || dto.getStatus() == Status.REFUSED) {
-                    result.get().setStatus(dto.getStatus());
-                    result.get().setUpdatedAt(LocalDateTime.now());
-                    return result.get();
-                }}
+            } else if (response.get().getStatus() == Status.OFFERED) {
+
+                if (loanDto.getStatus() == Status.ACCEPTED || loanDto.getStatus() == Status.REFUSED) {
+                    response.get().setStatus(loanDto.getStatus());
+                    response.get().setUpdatedAt(LocalDateTime.now());
+                    return loanRepository.save(response.get());
+
+                }
+            }
         }
         return null;
+
     }
+
 
     public List<Loan> getLoansByCustomer(Long customerId, LoanType loanType, Status status, BigDecimal amount) {
         Optional<List<Loan>> result = loanRepository.findAllByCustomerIdOrStatusOrLoanTypeOrAmountLessThanOrAmountGreaterThan(
