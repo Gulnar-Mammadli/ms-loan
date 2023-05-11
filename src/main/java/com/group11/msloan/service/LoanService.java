@@ -43,10 +43,13 @@ public class LoanService {
 
         Loan result = loanRepository.save(loan);
 
+
         loanDto.setStatus(Status.SUBMITTED);
+        loanDto.setCreatedAt(loan.getCreatedAt());
 
         // Push the loanDto to the loanCreatedTopic topic
         kafkaTemplate.send("loanCreatedTopic", loanDto);
+        log.info("An loan id: {} is added to the Database", loan.getId());
         return result;
 
     }
@@ -62,9 +65,10 @@ public class LoanService {
                 .term(loanDto.getTerm())
                 .status(loanDto.getStatus())
                 .createdAt(loanDto.getCreatedAt())
-                .updatedAt(LocalDateTime.now())
+                .updatedAt(loanDto.getUpdatedAt())
                 .build();
         loanRepository.save(loan);
+        log.info("Loan {}  status updated", loan.getId());
     }
 
 

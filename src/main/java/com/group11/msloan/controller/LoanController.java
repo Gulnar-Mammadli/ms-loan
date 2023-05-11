@@ -25,7 +25,7 @@ public class LoanController {
         return loanService.createLoan(loanDto);
     }
 
-    @PostMapping
+    @PostMapping("/kafka")
     Loan addLoan(@RequestBody LoanDto loanDto){
         return loanService.addLoan(loanDto);
     }
