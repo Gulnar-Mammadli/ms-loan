@@ -45,7 +45,7 @@ public class Loan {
     private Status status;
 
     @JsonProperty("created_at")
-    @Column(nullable = false,name = "created_at")
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @JsonProperty("updated_at")
