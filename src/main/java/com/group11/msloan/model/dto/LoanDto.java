@@ -3,6 +3,7 @@ package com.group11.msloan.model.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.group11.msloan.model.enums.LoanType;
 import com.group11.msloan.model.enums.Status;
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
@@ -35,5 +36,8 @@ public class LoanDto {
 
     @Enumerated(EnumType.STRING)
     private Status status;
+
+    @JsonProperty("decided_amount")
+    private BigDecimal decidedAmount;
 
 }

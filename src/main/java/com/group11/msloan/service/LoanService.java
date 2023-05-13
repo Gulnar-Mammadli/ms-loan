@@ -50,6 +50,7 @@ public class LoanService {
                     .amount(loanDto.getAmount())
                     .term(loanDto.getTerm())
                     .status(loanDto.getStatus())
+                    .decidedAmount(loanDto.getDecidedAmount())
                     .createdAt(result.get().getCreatedAt())
                     .updatedAt(LocalDateTime.now())
                     .build();

@@ -44,6 +44,10 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     private Status status;
 
+    @JsonProperty("decided_amount")
+    @Column(name = "decided_amount")
+    private BigDecimal decidedAmount;
+
     @JsonProperty("created_at")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
