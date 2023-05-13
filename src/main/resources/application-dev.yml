@@ -1,0 +1,46 @@
+server:
+  port: '8083'
+
+spring:
+  application:
+    name: ms-loan
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ms_loan
+    username: ms_loan_user
+    password: ms_loan_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        show_sql: true
+        format_sql: true
+    hibernate:
+      ddl-auto: update
+  kafka:
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring:
+          json:
+            type:
+              mapping: loandto:com.group11.msloan.model.dto.LoanDto
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      bootstrap-servers: localhost:9092
+    consumer:
+      group-id: loanDecisionGroup
+      properties:
+        spring:
+          json:
+            type:
+              mapping: loandtosend:com.group11.msloan.model.dto.LoanDto
+            trusted:
+              packages: '*'
+      enable-auto-commit: 'false'
+      auto-offset-reset: earliest
+      bootstrap-servers: localhost:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+
+
+
