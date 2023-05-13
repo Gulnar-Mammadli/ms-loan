@@ -12,4 +12,4 @@ ARG DEPENDENCY=/app/target/dependency
 COPY --from=maven ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=maven ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=maven ${DEPENDENCY}/BOOT-INF/classes /app
-CMD java -server -Dspring.profiles.active=prod -Xmx1024m -Xss1024k -XX:MaxMetaspaceSize=135m -XX:CompressedClassSpaceSize=28m -XX:ReservedCodeCacheSize=13m -XX:+IdleTuningGcOnIdle -Xtune:virtualized -cp app:app/lib/* com.group11.msauth.MsLoanApplication
+CMD java -server -Dspring.profiles.active=prod -Xmx1024m -Xss1024k -XX:MaxMetaspaceSize=135m -XX:CompressedClassSpaceSize=28m -XX:ReservedCodeCacheSize=13m -XX:+IdleTuningGcOnIdle -Xtune:virtualized -cp app:app/lib/* com.group11.msloan.MsLoanApplication
