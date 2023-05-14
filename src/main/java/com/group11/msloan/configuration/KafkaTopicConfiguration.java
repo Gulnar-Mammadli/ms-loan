@@ -19,4 +19,10 @@ public class KafkaTopicConfiguration {
         return TopicBuilder.name("decisionTopic")
                 .build();
     }
+
+    @Bean
+    public NewTopic decisionMadeTopicCreation(){
+        return TopicBuilder.name("decisionMadeTopic")
+                .build();
+    }
 }

@@ -5,9 +5,9 @@ spring:
   application:
     name: ms-loan
   datasource:
-    url: jdbc:postgresql://localhost:5432/ms_loan
-    username: ms_loan_user
-    password: ms_loan_password
+    url: jdbc:postgresql://localhost:5432/loan-db
+    username: postgres
+    password: postgres
     driver-class-name: org.postgresql.Driver
   jpa:
     properties:
@@ -33,7 +33,7 @@ spring:
         spring:
           json:
             type:
-              mapping: loandtosend:com.group11.msloan.model.dto.LoanDto
+              mapping: decisiondtosend:com.group11.msloan.model.dto.DecisionDto
             trusted:
               packages: '*'
       enable-auto-commit: 'false'
