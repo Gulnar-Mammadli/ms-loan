@@ -17,6 +17,7 @@ public class KafkaTopicConfiguration {
     @Bean
     public NewTopic decisionTopicCreation(){
         return TopicBuilder.name("decisionTopic")
+//                .partitions(2)
                 .build();
     }
 
