@@ -40,7 +40,7 @@ public class LoanService {
         return null;
     }
 
-    @KafkaListener(topics = "decisionTopic", groupId = "loanDecisionGroup",concurrency = "4")
+    @KafkaListener(topics = "decisionTopic", groupId = "loanDecisionGroup")
     public void updateByDecisionInfo(DecisionDto decisionDto) {
         log.info("decision received {}  status updated", decisionDto.toString());
 
